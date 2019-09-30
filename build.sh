@@ -13,7 +13,7 @@ if [ -z "$COMMIT" ]; then
   export COMMIT=`git rev-parse HEAD`
 fi
 
-export CLASSES="tmp/classes"
+export CLASSES="target/classes"
 
 rm -r ${CLASSES}
 mkdir -p ${CLASSES}
@@ -33,9 +33,9 @@ clj -e "(set! *compile-path* \"${CLASSES}\") (compile '${MAIN_FUNC})" \
   && clj -A:uberjar \
   || exit 1
 
-chmod +r tmp/*.jar
+chmod +r target/*.jar
 
 echo "start command:"
-echo "  CONFIG_EDN=..conf/angara.edn java -cp ${JAR_FILE} ${MAIN_FUNC}"
+echo "  CONFIG_EDN=..conf/angara.edn java -jar ${JAR_FILE}"
 
 #.

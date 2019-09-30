@@ -3,12 +3,15 @@
   (:require 
     [mount.core :refer [defstate]]
     ;
+    [mlib.config :refer [conf]]
     [mlib.logger :refer [debug]]))
 ;=
 
 (defstate worker
   :start
-    true)
+    (do
+      (debug "conf:" conf)
+      true))
 ;=
 
 ;;.

@@ -9,7 +9,7 @@
     [mlib.util      :refer [edn-read edn-resource]]
     [mlib.logger    :refer [debug info warn]]
     ;;
-    [lsn.app.core :refer [worker]]))
+    [gtb.app.core :refer [worker]]))
 ;
 
 (defn load-edn [file-name]

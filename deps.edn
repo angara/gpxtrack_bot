@@ -1,0 +1,52 @@
+
+{
+  :paths ["src"]
+
+  :deps
+  {
+    org.clojure/clojure       {:mvn/version "1.10.1"}
+    org.clojure/core.async    {:mvn/version "0.4.500"}
+
+    clojure.java-time         {:mvn/version "0.3.2"}
+    metosin/jsonista          {:mvn/version "0.2.4"}
+    clj-http                  {:mvn/version "3.10.0"}
+
+
+    mount                     {:mvn/version "0.1.16"}
+    com.novemberain/monger    {:mvn/version "3.5.0"}
+    ; com.novemberain/langohr   {:mvn/version "5.1.0"}
+
+    ring/ring-jetty-adapter   {:mvn/version "1.7.1"}
+    ; ring/ring-core            {:mvn/version "1.7.1"}
+    ; ring/ring-json            {:mvn/version "0.4.0"}
+    ; ring/ring-headers         {:mvn/version "0.3.0"}
+    ; compojure                 {:mvn/version "1.6.1"}
+    ; hiccup                    {:mvn/version "1.0.5"}
+
+    ch.qos.logback/logback-classic {:mvn/version "1.2.3"}}
+  ;
+
+  :aliases
+  {
+    :nrepl
+    {
+      :extra-paths ["dev" "resources"]
+      :extra-deps
+        { nrepl/nrepl       {:mvn/version "0.6.0"}
+          cider/cider-nrepl {:mvn/version "0.21.1"}
+          proto-repl        {:mvn/version "RELEASE"}}
+      :main-opts
+        ["-m" "nrepl.cmdline" "--middleware" "[cider.nrepl/cider-middleware]"]}
+
+    :uberjar
+    {
+      ;; https://github.com/seancorfield/depstar
+      :extra-paths ["resources" "tmp/classes"]
+      :extra-deps {seancorfield/depstar {:mvn/version "0.3.3"}}
+      :main-opts ["-m" "hf.depstar.uberjar" "tmp/cproc.jar" "-m" "lsn.cproc.main"]}}
+
+  ;; ;; ;; ;;
+
+  :. :.}
+
+;;.

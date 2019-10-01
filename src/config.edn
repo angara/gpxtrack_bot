@@ -6,8 +6,8 @@
     {
       :apikey   "${GPXTRACK_APIKEY}"
       :retry    3
-      :timeout  5000
-      :socks    {:host "localhost" :port 2018}}}
+      :timeout  5000}}
+      ; :proxy {:host "http-proxy-host" :port 9999}}
 
   :mdb
   {

@@ -66,17 +66,18 @@
 ;;
 
 (defn api [token method params & [opts]]
+  (prn "opts:" opts)
   (let [opts (or opts *opts*)]
     (Thread/sleep 20)
     (loop [retry (or (:retry opts) RETRY_COUNT)]
       (let [res
             (try
               (let [{:keys [status body]} (api-call token method params opts)]
-                (if (-> body (:error_code) (first) #{\3 \5}) ;; 3xx or 5xx codes
-                  ::retry
-                  (if (= 200 status)
-                    body
-                    (assoc body :status status))))
+                (if (= 200 status)
+                  body
+                  (if (-> body (:error_code) (str) (first) #{\3 \5}) ;; 3xx or 5xx codes
+                    ::retry
+                    {:error (assoc body :status status)})))
               (catch Exception ex
                 {:error {:exception ex}}))]
             ;
@@ -85,8 +86,8 @@
           res)))))
 ;;
 
-(defn get-updates [token limit & [opts]]
-  (api token "getUpdates" {:limit limit} opts))
+(defn get-updates [token offset limit & [opts]]
+  (api token "getUpdates" {:offset offset :limit limit} opts))
 ;;
 
 ;; ;; ;; ;; ;; ;; ;; ;; ;; ;;

@@ -7,8 +7,8 @@
     [mlib.config :refer [conf]]
     [mlib.util :refer [edn-read edn-resource]]
     ;
-    [gtb.app.core :as app-core]))
-;
+    [gtb.app.poll :as poll]))
+;=
 
 (declare start)
 (declare start-conf)
@@ -35,7 +35,7 @@
 ;
 
 (defn get-worker []
-  app-core/worker)
+  poll/worker)
 ;
 
 (defn configs []

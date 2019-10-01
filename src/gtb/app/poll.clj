@@ -1,5 +1,5 @@
 
-(ns gtb.app.core
+(ns gtb.app.poll
   (:require 
     [mount.core :refer [defstate]]
     ;
@@ -13,14 +13,25 @@
 
 (defn init [*state]
   (reset! *state
-    {:cfg (get-in conf [CFG :telegram])}))
+    { :cfg        (get-in conf [CFG :telegram])
+      :last-update 0}))
 ;;
 
 (defn step [*state]
-  (let [{{apikey :apikey} :cfg} @*state
-        {:keys [result error]} (telegram/get-updates apikey 1)]
+  (prn "state:" @*state)
+  (let [{:keys [cfg last-update]} @*state
+        ;
+        {:keys [result error] :as rc} 
+        (telegram/get-updates (:apikey cfg) (inc last-update) 1 cfg)
+        ;
+        ,]
+    (debug "rc:" rc)
+    (prn "rc:" rc)
     (if-let [update (first result)]
-      (debug "update:" update)
+      (do
+        (debug "update:" update)
+        (swap! *state assoc :last-update (:update_id update)))
+        ;; process update
       (do
         (warn "get-updates:" error)
         (Thread/sleep 5000)))))
@@ -44,13 +55,17 @@
 
 (comment
 
+  worker 
+
   (name telegram/E_RETRY_LIMIT)
 
   conf
   
-  (binding [telegram/*opts* (-> conf :gpxtrack :telegram)]
-    (telegram/get-updates
-      (-> conf :gpxtrack :telegram :apikey)
-      1))
+  (init (atom {}))
+
+  (let [*state (atom {})]
+    (init *state)
+    (step *state)
+    (step *state))
 
   ,)

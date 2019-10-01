@@ -6,7 +6,8 @@
     {
       :apikey   "${GPXTRACK_APIKEY}"
       :retry    3
-      :timeout  5000}}
+      :timeout  5000
+      :longpoll 10}}  ;; sec
       ; :proxy {:host "http-proxy-host" :port 9999}}
 
   :mdb

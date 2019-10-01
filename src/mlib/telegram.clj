@@ -10,7 +10,9 @@
 
 (def RETRY_COUNT      5)
 (def SOCKET_TIMEOUT   8000)
-(def SOCKET_ERR_DELAY 1000)
+; (def SOCKET_ERR_DELAY 1000)
+
+(def LONGPOLL 10)
 
 (def E_RETRY_LIMIT   ::E_RETRY_LIMIT)
 
@@ -66,7 +68,6 @@
 ;;
 
 (defn api [token method params & [opts]]
-  (prn "opts:" opts)
   (let [opts (or opts *opts*)]
     (Thread/sleep 20)
     (loop [retry (or (:retry opts) RETRY_COUNT)]
@@ -87,7 +88,11 @@
 ;;
 
 (defn get-updates [token offset limit & [opts]]
-  (api token "getUpdates" {:offset offset :limit limit} opts))
+  (let [longpoll (:longpoll opts LONGPOLL)
+        timeout  (:timeout  opts SOCKET_TIMEOUT)]
+    (api token "getUpdates" 
+      {:offset offset :limit limit :timeout longpoll} 
+      (assoc opts :timeout (+ timeout (* 1000 longpoll))))))
 ;;
 
 ;; ;; ;; ;; ;; ;; ;; ;; ;; ;;

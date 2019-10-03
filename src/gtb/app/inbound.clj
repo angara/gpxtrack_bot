@@ -5,7 +5,7 @@
     ;
     [gtb.const    :refer [MIME_GPX]]
     [gtb.app.priv :refer [priv-message]]
-    [gtb.app.file :refer [save-chat-file]]))
+    [gtb.app.file :refer [save-gpx-file]]))
 ;=
 
 
@@ -17,7 +17,7 @@
   (cond
     ;
     (= MIME_GPX (-> message :document :mime_type))
-    (save-chat-file message)
+    (save-gpx-file message)
     ;
     :else 
     false))

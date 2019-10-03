@@ -3,25 +3,31 @@
 ## Data Structure
 
 - **track**
-  - id      str_id
+  - id      str_seq
   - ct      ts
   - ts      ts
   - type    "gpx"
   - user_id "tg:123456"
   - status  "public"|"private"|"deleted"
+  - hash    "sha1(file)"
   - file    {:path ... :size ...}
   - source  {:telegram {:from {...} :chat {...} :caption "..."}}
-  - info    {:title "source/telegram/caption" :tags [...] :related [...]}
+  - info    {:title "source/telegram/caption" :tags [...] :related [...], :num_seg 999}
+  - geom    {box? center?}
+
+- **track_var**
+  - id  (var name)
+  - val (value)
 
 Track points:
 
 - **track_pnt**
-  - id      str_id
-  - track   str_id
-  - seq     ord
-  - coord:  [lon,lat]
-  - elev    999
-  - time    orig_time
+  - id        str_id
+  - track_id  str_id      ;; references track.id
+  - seq       ord
+  - coord     [lon,lat]   ;; 2dshpere index
+  - elev      999
+  - time      orig_time
 
 ## BotFather
 

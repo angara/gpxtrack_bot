@@ -4,7 +4,7 @@
     [mlib.logger  :refer [debug]]
     ;
     [gtb.const    :refer [MIME_GPX]]
-    [gtb.app.file :refer [save-chat-file]]))
+    [gtb.app.file :refer [save-gpx-file]]))
 ;=
 
 
@@ -13,7 +13,9 @@
   (cond
     ;
     (= MIME_GPX (-> message :document :mime_type))
-    (save-chat-file message)
+    (do
+      (save-gpx-file message))
+      ;; (reply-gpx)
     ;
     :else 
     false))

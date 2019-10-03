@@ -21,6 +21,7 @@
   (stop)
 
   (reset)
+ 
   (restart)
 
   ,)
@@ -43,7 +44,6 @@
     (edn-read "../conf/dev.edn")])
 ;
 
-
 (defn start-conf[]
   (mount/stop)
   (->
@@ -51,6 +51,14 @@
     (mount/with-args (configs))
     (mount/start)))
 ;
+
+(comment
+  (start-conf)
+
+  conf
+
+  (edn-read "../conf/dev.edn")
+  ,)
 
 (defn start []
   (prn "start with configs")
@@ -63,3 +71,5 @@
 ;
 
 ;;.
+
+

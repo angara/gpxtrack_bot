@@ -11,13 +11,13 @@
       ; :proxy {:host "http-proxy-host" :port 9999}}
 
   :mdb
-  {
-    :angara { :url "${MDB_ANGARA}"}}
+  {:angara 
+    {:url "${MDB_ANGARA}"}}
   ;
 
   :files
   {
-    :gpxtrack "../files/gpxtrack"}
+    :gpxtrack "../files/track"}
   ;
 
   :build

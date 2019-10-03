@@ -9,8 +9,8 @@
     [mlib.util      :refer [edn-read edn-resource]]
     [mlib.logger    :refer [debug info warn]]
     ;;
-    [gtb.app.poll :refer [worker]]))
-;
+    [gtb.app.poll   :refer [worker]]))
+;=
 
 (defn load-edn [file-name]
   (debug "load-edn:" file-name)

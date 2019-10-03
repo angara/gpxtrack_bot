@@ -55,17 +55,10 @@
 
 ;; ;; ;; ;; ;; ;; ;; ;; ;; ;;
 
-(defn p [s]
-  (prn "p:" s)
-  s)
-;;
-
 (defstate mdb
   :start
-    (-> conf
-      (p)
+    (-> conf      
       (get-in [:mdb :angara :url])
-      (p)
       (connect)
       (indexes)
       (init-vars))

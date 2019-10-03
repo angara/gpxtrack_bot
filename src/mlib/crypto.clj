@@ -19,10 +19,12 @@
 (defn ^bytes byte-array-hash-str
   "calculate hash of byte array as hex string"
   [^String hash-name ^bytes barray]
-  (let [md (MessageDigest/getInstance hash-name)]
-    (.update md barray)
-    (.digest md)
-    (apply str (map hexbyte md))))
+  (->
+    (let [md (MessageDigest/getInstance hash-name)]
+      (.update md barray)
+      (.digest md))
+    (as-> x
+      (apply str (map hexbyte x)))))
 ;;
 
 (defn ^bytes calc-hash

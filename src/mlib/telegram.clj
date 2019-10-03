@@ -3,8 +3,7 @@
   (:require
     [clojure.string :refer [escape]]
     [clj-http.client :as http]
-    [jsonista.core :as json]
-    [mlib.logger :refer [info warn]]))
+    [jsonista.core :as json]))
 ;=
 
 
@@ -17,20 +16,17 @@
 (def E_RETRY_LIMIT   ::E_RETRY_LIMIT)
 
 
-(defn api-url [token method]
-  (str "https://api.telegram.org/bot" token "/" (name method)))
+(defn api-url [^String apikey ^String method]
+  (str "https://api.telegram.org/bot" apikey "/" method))
 ;
 
-(defn file-url [token path]
-  (str "https://api.telegram.org/file/bot" token "/" path))
+(defn file-url [^String apikey ^String path]
+  (str "https://api.telegram.org/file/bot" apikey "/" path))
 ;
 
-(defn hesc [text]
+(defn hesc [^String text]
   (escape text {\& "&amp;" \< "&lt;" \> "&gt;" \" "&quot;"}))
 ;
-
-
-(def ^:dynamic *opts*)
 
 ;; ;; ;; ;; ;; ;; ;; ;; ;; ;;
 
@@ -51,8 +47,8 @@
 
 ;; ;; ;; ;; ;; ;; ;; ;; ;; ;;
 
-(defn api-call [token method params & [{:keys [timeout proxy]}]]
-  (let [url   (api-url token method)
+(defn api-call [method params {:keys [apikey timeout proxy]}]
+  (let [url   (api-url apikey method)
         body  (json/write-value-as-bytes params)
         data  {:content-type      :json
                :body              body
@@ -67,93 +63,98 @@
       (json-body))))
 ;;
 
-(defn api [token method params & [opts]]
-  (let [opts (or opts *opts*)]
-    (Thread/sleep 20)
-    (loop [retry (or (:retry opts) RETRY_COUNT)]
-      (let [res
-            (try
-              (let [{:keys [status body]} (api-call token method params opts)]
-                (if (= 200 status)
-                  body
-                  (if (-> body (:error_code) (str) (first) #{\3 \5}) ;; 3xx or 5xx codes
-                    ::retry
-                    {:error (assoc body :status status)})))
-              (catch Exception ex
-                {:error {:exception ex}}))]
-            ;
-        (if (and (= ::retry res) (< 0 retry))
-          (recur (dec retry))
-          res)))))
+(defn api [^String method params opts]
+  (Thread/sleep 20)
+  (loop [retry (or (:retry opts) RETRY_COUNT)]
+    (let [res
+          (let [{:keys [status body]} (api-call method params opts)]
+            (if (= 200 status)
+              (:result body)
+              (if (-> body (:error_code) (str) (first) #{\3 \5}) ;; 3xx or 5xx codes
+                ::retry
+                (throw (ex-info "tgapi-call"
+                          (assoc body :status status))))))]
+          ;
+      (if (and (= ::retry res) (< 0 retry))
+        (recur (dec retry))
+        res))))
 ;;
 
-(defn get-updates [token offset limit & [opts]]
+(defn get-updates [offset limit opts]
   (let [longpoll (:longpoll opts LONGPOLL)
         timeout  (:timeout  opts SOCKET_TIMEOUT)]
-    (api token "getUpdates" 
+    (api "getUpdates" 
       {:offset offset :limit limit :timeout longpoll} 
       (assoc opts :timeout (+ timeout (* 1000 longpoll))))))
 ;;
 
 ;; ;; ;; ;; ;; ;; ;; ;; ;; ;;
 
-(defn send-text [token chat-id text]
-  (api token :sendMessage
-    {:chat_id chat-id :text text :parse_mode "HTML"}))
+(defn send-text [chat-id text opts]
+  (api "sendMessage" {:chat_id chat-id :text text :parse_mode "HTML"} opts))
 ;
 
-(defn send-message [token chat-id params]
-  (api token :sendMessage (merge {:chat_id chat-id} params)))
+(defn send-message [chat-id params opts]
+  (api "sendMessage" (assoc params :chat_id chat-id) opts))
 ;
 
-(defn file-path [token file-id]
-  ;; {:file_id "..." :file_size 999 :file_path "dir/file.ext"}
-  (:file_path
-    (api token :getFile {:file_id file-id})))
+(defn file-info 
+  "{:file_id \"...\" :file_size 999 :file_path \"dir/file.ext\""
+  [file-id opts]
+  (api "getFile" {:file_id file-id} opts))
 ;
 
-(defn get-file [token file-id & [{timeout :timeout}]]
-  (if-let [path (file-path token file-id)]
-    (try
-      (:body
-        (http/get (file-url token path)
-          { :as :byte-array
-            :socket-timeout (or timeout SOCKET_TIMEOUT)
-            :conn-timeout   (or timeout SOCKET_TIMEOUT)}))
-      (catch Exception e
-        (warn "get-file:" file-id (.getMessage e))))
+(defn file-fetch [file-id opts]
+  (let [;
+        {file-path :file_path :as rc} (file-info file-id opts)
+        ;
+        url       (file-url (:apikey opts) file-path)
+        timeout   (or (:timeout opts) SOCKET_TIMEOUT)
+        proxy     (:proxy opts)
+        data      { :as               :byte-array
+                    :socket-timeout   timeout
+                    :conn-timeout     timeout
+                    :proxy-host       (:host proxy)
+                    :proxy-port       (:port proxy)
+                    :throw-exceptions false}
+        ;
+        {status :status body :body} 
+        (http/get url data)]
     ;
-    (info "get-file - not path for file_id:" file-id)))
-;
+    (if (= 200 status)
+      (assoc rc :body body)
+      (throw (ex-info "http/get failed"
+                {:status status :body body})))))
+;;
 
-(defn send-file
-  "params should be stringable (json/generate-string)
-    or File/InputStream/byte-array"
-  [token method mpart & [{timeout :timeout}]]
-  (try
-    (let [tout (or timeout SOCKET_TIMEOUT)
-          res (:body
-                (http/post (api-url token method)
-                  { :multipart
-                      (for [[k v] mpart]
-                        {:name (name k) :content v :encoding "utf-8"})
-                    :as :json
-                    :throw-exceptions false
-                    :socket-timeout tout
-                    :conn-timeout tout}))]
-          ;
-      (if (:ok res)
-        (:result res)
-        (info "send-file:" method res)))
-    (catch Exception e
-      (warn "send-file:" method (.getMessage e)))))
-;
+; (defn send-file
+;   "params should be stringable (json/generate-string)
+;     or File/InputStream/byte-array"
+;   [method mpart & [{timeout :timeout :as opts}]]
+;   (try
+;     (let [tout (or timeout SOCKET_TIMEOUT)
+;           res (:body
+;                 (http/post (api-url (:apikey opts) method)
+;                   { :multipart
+;                       (for [[k v] mpart]
+;                         {:name (name k) :content v :encoding "utf-8"})
+;                     :as :json
+;                     :throw-exceptions false
+;                     :socket-timeout tout
+;                     :conn-timeout tout}))]
+;           ;
+;       (if (:ok res)
+;         (:result res)
+;         (info "send-file:" method res)))
+;     (catch Exception e
+;       (warn "send-file:" method (.getMessage e)))))
+; ;
 
 
-(defn set-webhook-cert [token url cert-file]
-  (http/post (api-url token :setWebhook)
-    {:multipart [ {:name "url" :content url}
-                  {:name "certificate" :content cert-file}]}))
-;
+; (defn set-webhook-cert [url cert-file]
+;   (http/post (api-url apikey "setWebhook")
+;     {:multipart [ {:name "url" :content url}
+;                   {:name "certificate" :content cert-file}]}))
+; ;
 
 ;;.

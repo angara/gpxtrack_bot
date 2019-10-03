@@ -26,36 +26,32 @@
       :last-log    0))
 ;;
 
+(defn get-updates [cfg last-update]
+  (try
+    (first (telegram/get-updates (inc last-update) 1 cfg))
+    (catch Exception ex
+      (warn "get-updates:" ex)
+      (Thread/sleep ERROR_PAUSE))))
+;;
+  
 (defn step [*state]
   (let [{:keys [cfg last-update]} @*state
-        ;
-        {:keys [result error]} 
-        (telegram/get-updates (:apikey cfg) (inc last-update) 1 cfg)
-        ;
-        ,]
+        upd (get-updates cfg last-update)]
     ;
-    (if error
-      (do
-        (warn "get-updates:" error)
-        (Thread/sleep ERROR_PAUSE))
-      (do
-        (when-let [update (first result)]
-          (swap! *state assoc :last-update (:update_id update))
-          (try
-            (handle-update update)
-            (catch Exception ex
-              (warn "worker.step catch:" update ex))))
-        ;
-        (let [{:keys [last-log last-update]} @*state
-              now (now-ms)]
-          (when (< last-log (- now LOG_MARK_INTERVAL))
-            (debug "last-update:" last-update)
-            (swap! *state assoc :last-log now)))))))
-        ;
+    (when upd
+      (swap! *state assoc :last-update (:update_id upd))
+      (try
+        (handle-update upd)
+        (catch Exception ex
+          (warn "worker.step catch:" upd ex))))
+    ;
+    (let [{:keys [last-log last-update]} @*state
+          now (now-ms)]
+      (when (< last-log (- now LOG_MARK_INTERVAL))
+        (debug "last-update:" last-update)
+        (swap! *state assoc :last-log now)))))
       ;
     ;
-
-
 ;;
 
 (defn cleanup [_state ex]

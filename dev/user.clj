@@ -52,14 +52,6 @@
     (mount/start)))
 ;
 
-(comment
-  (start-conf)
-
-  conf
-
-  (edn-read "../conf/dev.edn")
-  ,)
-
 (defn start []
   (prn "start with configs")
   (mount/start-with-args (configs)))

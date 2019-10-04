@@ -3,13 +3,12 @@
   (:require 
     [mount.core :refer [defstate]]
     ;
-    [mlib.config :refer [conf]]
     [mlib.logger :refer [debug warn]]
     [mlib.thread :refer [start-loop stop-loop]]
     [mlib.util   :refer [now-ms]]
     [mlib.telegram :as telegram]
     ;
-    [gtb.const :refer [CFG]]
+    [gtb.app.cfg     :as cfg]
     [gtb.app.inbound :refer [handle-update]]))
 ;=
 
@@ -21,22 +20,21 @@
   (debug "worker.init")
   (swap! *state 
     assoc
-      :cfg (get-in conf [CFG :telegram])
-      :last-update 0
-      :last-log    0))
+      :last-update  0
+      :last-log     0))
 ;;
 
-(defn get-updates [cfg last-update]
+(defn get-updates [last-update]
   (try
-    (first (telegram/get-updates (inc last-update) 1 cfg))
+    (first (telegram/get-updates (inc last-update) 1 cfg/tg))
     (catch Exception ex
       (warn "get-updates:" ex)
       (Thread/sleep ERROR_PAUSE))))
 ;;
   
 (defn step [*state]
-  (let [{:keys [cfg last-update]} @*state
-        upd (get-updates cfg last-update)]
+  (let [{:keys [last-update]} @*state
+        upd (get-updates last-update)]
     ;
     (when upd
       (swap! *state assoc :last-update (:update_id upd))

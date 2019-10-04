@@ -7,7 +7,7 @@
 (defn parse-bytes [bytes]
   (let [
         gpx (parse (input-stream bytes))]
-    (prn "gpx:" gpx)
+    ;; (prn "gpx:" gpx)
     gpx))
 ;;
 

@@ -1,5 +1,5 @@
 
-(ns gtb.app.core
+(ns gtb.app.cfg
   (:require
     [mount.core   :refer [defstate]]
     [mlib.config  :refer [conf]]
@@ -7,15 +7,20 @@
 ;=
 
 
-(defstate app-cfg
+(defstate app
   :start
     (get conf CFG))
 ;=
 
 
-(defstate tg-cfg
+(defstate tg
   :start
-    (:telegram app-cfg))
+    (:telegram app))
 ;=
  
+(defstate files
+  :start
+    (:files conf))
+;=
+
 ;;.

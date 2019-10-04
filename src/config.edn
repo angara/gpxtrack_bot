@@ -7,8 +7,17 @@
       :apikey   "${GPXTRACK_APIKEY}"
       :retry    3
       :timeout  5000
-      :longpoll 10}}  ;; sec
+      :longpoll 10}  ;; sec
       ; :proxy {:host "http-proxy-host" :port 9999}}
+    ;
+    :storage
+    {
+      :prefix "track"}
+
+    :base-url "https://angara.net/files/"}
+
+  ;;
+
 
   :mdb
   {:angara 
@@ -17,7 +26,7 @@
 
   :files
   {
-    :gpxtrack "../files/track"}
+    :base-dir "../files/track"}
   ;
 
   :build

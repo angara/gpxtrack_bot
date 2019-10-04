@@ -8,6 +8,7 @@
     org.clojure/core.async    {:mvn/version "0.4.500"}
 
     clojure.java-time         {:mvn/version "0.3.2"}
+
     metosin/jsonista          {:mvn/version "0.2.4"}
     clj-http                  {:mvn/version "3.10.0"}
 

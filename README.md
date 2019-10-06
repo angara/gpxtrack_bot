@@ -11,9 +11,9 @@
   - status  "public"|"private"|"deleted"
   - hash    "sha1(file)"
   - file    {:path ... :size ...}
-  - source  {:telegram {:from {...} :chat {...} :caption "..."}}
+  - orig    {:telegram {:from {...} :chat {...} :document {...} :caption "..."}}
   - info    {:title "source/telegram/caption" :tags [...] :related [...], :num_seg 999}
-  - geom    {box? center?}
+  - geom    {box? center? bounds?}
 
 - **track_var**
   - id  (var name)

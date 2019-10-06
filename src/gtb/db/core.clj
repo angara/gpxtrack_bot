@@ -8,8 +8,8 @@
     ;
     [mount.core   :refer [defstate]]
     [mlib.mongo   :refer [connect disconnect new_id id_id]]
-    [mlib.config  :refer [conf]]))
-    ; [mlib.util :refer [now-ms]]
+    [mlib.config  :refer [conf]]
+    [mlib.util :refer [now-ms]]))
 ;
 
 ;; ;; ;; ;; ;; ;; ;; ;; ;; ;;
@@ -121,6 +121,29 @@
       {:$inc  {:val (or n 1)}}
       {:return-new true})
     (:val)))
+;;
+
+;; ;; ;; ;; ;; ;; ;; ;; ;; ;;
+
+(defn create-track [id data]
+  (prn "data:" data)
+  (-> (dbc)
+    (mc/insert-and-return TRACK_COLL
+      (assoc data
+        :ct (now-ms)
+        :ts (now-ms)
+        :_id id))
+    (id_id)))
+;;
+
+(defn update-track [id data]
+  (-> (dbc)
+    (mc/update TRACK_COLL
+      {:_id id}
+      {:$set (assoc data {:ts (now-ms)})}
+      {:upsert false})
+    (.getN)
+    (= 1)))
 ;;
 
 ;;.

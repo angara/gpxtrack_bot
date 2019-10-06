@@ -2,14 +2,15 @@
 (ns gtb.main
   (:gen-class)
   (:require
-    [clojure.string :refer [blank? split]]
-    [mount.core     :as mount]
+    [clojure.string :refer  [blank? split]]
+    [mount.core     :as     mount]
     ;;
-    [mlib.config    :refer [conf]]
-    [mlib.util      :refer [edn-read edn-resource]]
-    [mlib.logger    :refer [debug info warn]]
+    [mlib.config    :refer  [conf]]
+    [mlib.util      :refer  [edn-read edn-resource]]
+    [mlib.logger    :refer  [debug info warn]]
+    [mlib.thread    :refer  [join]]
     ;;
-    [gtb.app.poll   :refer [worker]]))
+    [gtb.app.poll   :refer  [worker]]))
 ;=
 
 (defn load-edn [file-name]
@@ -39,10 +40,10 @@
   (mount/start-with-args
     (concat
       [(edn-resource "config.edn") {:build (edn-resource "build.edn")}]
-      (load-env-configs (System/getenv "CONFIG_EDN")))))
+      (load-env-configs (System/getenv "CONFIG_EDN"))))
 
-  ; (info "main started."))
-  ;   (join worker)))
+  (info "main started.")
+  (info "exiting:" (join worker)))
 ;;
 
 ;;.

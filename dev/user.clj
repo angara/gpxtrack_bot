@@ -10,6 +10,8 @@
     [gtb.app.poll :as poll]))
 ;=
 
+(set! *warn-on-reflection* true)
+
 (declare start)
 (declare start-conf)
 (declare stop)

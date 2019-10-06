@@ -1,19 +1,26 @@
 
 (ns gtb.app.track
   (:require
-    [mlib.telegram :refer [hesc]]
+    [mlib.telegram  :refer [hesc]]
     ;
-    [gtb.app.cfg   :as    cfg]))
+    [gtb.app.cfg    :as     cfg]))
 ;=
 
+
 (defn describe [track]
-  (str 
-    "<b>Track" (:id track) "</b>"
-    "\n"
-    (hesc (:file-name track)) 
-    "\n"
-    "gpx: " (:base-url cfg/app) (:path track)
-    "\n"))
+  (let [{:keys [id info file orig]} track]
+    (str 
+      "#track <b>" id "</b> - "
+      (hesc (:title info)) 
+      "\n"
+      (when-let [u (-> orig :telegram :from :username)]
+        (str "@" u "\n"))
+      "link: " (:base-url cfg/app) (:path file)
+      "\n")))
 ;;
+
+; (defn create-track [id data]
+;   (db/create-track id data))
+; ;;
 
 ;;.

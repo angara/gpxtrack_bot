@@ -9,8 +9,8 @@
     [mlib.telegram    :refer  [file-fetch] :as tg]
     ;
     [gtb.app.cfg      :as     cfg]
-    [gtb.db.core      :refer  [inc-var TRACK_SEQ_VAR]]
-    [gtb.gpx.core     :refer  [parse-bytes]]))
+    [gtb.db.core      :refer  [inc-var TRACK_SEQ_VAR create-track]]
+    [gtb.lib.core     :refer  [not-blank? tg->user-id]]))
 ;=
 
 (def FILE_SIZE_MAX (* 10 1024 1024))  ;; 10 Mb
@@ -48,11 +48,19 @@
 (defn save-gpx-file [message]
   ; (debug "save-chat-file:" (:document message))
 
-  (let [{{  file-id   :file_id 
-            file-size :file_size 
-            file-name :file_name} :document
-          caption                 :caption} message]
-    ;
+  (let [{ document  :document
+          caption   :caption        
+          from      :from}          message
+        ;
+        { file-id   :file_id 
+          file-size :file_size 
+          file-name :file_name}     document
+
+        { user-id   :id}            from]
+          ; username    :username
+          ; frist-name  :first_name
+          ; last-name   :last_name}   from]
+    ;;
     (if (> file-size FILE_SIZE_MAX)
       (do
         (warn "file too big:" file-size)
@@ -62,13 +70,24 @@
             hash (byte-array-hash-str HASH_FN body)
             ; gpx  (parse-bytes body)
             id   (next-track-id)
-            path (write-data id body)]
+            path (write-data id body)
+            ;
+            title (if (not-blank? caption) caption file-name)]
             ;
         (debug "file:" hash fr path)
-        { :id         id 
-          :path       path 
-          :hash       hash 
-          :file-name  file-name}))))
+
+        ; - info    {:title "source/telegram/caption" :tags [...] :related [...], :num_seg 999}
+        ; - geom    {box? center? bounds?}
+
+        (create-track id
+          { :type     "gpx"
+            :user_id  (tg->user-id user-id)
+            :status   "public"
+            :hash     hash
+            :file     {:path path :size file-size}
+            :orig     {:telegram message}
+            :info     {:title title}})))))
+            ;; geom
 ;;
 
-;;,
+;;.

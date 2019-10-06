@@ -1,5 +1,5 @@
 
-(ns gtb.gpx.core
+(ns gtb.lib.gpx
   (:require
     [clojure.java.io  :refer [input-stream]]
     [clojure.xml      :refer [parse]]))

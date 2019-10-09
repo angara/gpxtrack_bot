@@ -20,7 +20,16 @@
       "<b>GPX Track bot</b>\n"
       "version: " (-> conf :build :version) " " (-> conf :build :timestamp) "\n"
       "\n"
-      "Обсуждение работы бота - @gpxtrack_chat")
+      "Бот умеет сохранять <b>.gpx</b> файлы из групповых или приватных чатов, "
+      "публиковать ссылки на них."
+      "\n"
+      "\nВ разработке:\n"
+      " - данные трека/сегментов\n"
+      " - редактирование своих треков\n"
+      " - поиск по названию, активности, времени года, территориям\n"
+      " - отображение на карте"
+      "\n\n"
+      "Обсуждение работы бота и пожелания по разработке - @gpxtrack_chat")
     cfg/tg))
 ;;
 
@@ -33,7 +42,7 @@
     (cond
       ;
       is-gpx
-      (when-let [track (save-gpx-file message)]
+      (when-let [track (save-gpx-file message false)]
         (debug "track.private:" track)
         (send-text
           chat-id

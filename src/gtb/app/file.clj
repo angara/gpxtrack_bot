@@ -8,10 +8,18 @@
     [mlib.logger      :refer  [debug warn]]
     [mlib.telegram    :refer  [file-fetch] :as tg]
     ;
+    [gtb.const        :refer 
+      [TRACK_STATUS_PUBLIC TRACK_STATUS_PRIVATE TRACK_TYPE_GPX]]
     [gtb.app.cfg      :as     cfg]
-    [gtb.db.core      :refer  [inc-var TRACK_SEQ_VAR create-track]]
+    [gtb.db.core      :refer  [inc-var TRACK_SEQ_VAR create-track track-by-hash]]
+    [gtb.gpx.core     :refer  [parse-bytes]]
     [gtb.lib.core     :refer  [not-blank? tg->user-id]]))
 ;=
+
+
+(def E_FILE_TOO_BIG   ::e-file-too-big)
+(def E_FILE_EXISTS    ::e-file-exists)
+(def E_FILE_FORMAT    ::e-file-formmat)
 
 (def FILE_SIZE_MAX (* 10 1024 1024))  ;; 10 Mb
 
@@ -45,7 +53,7 @@
     (str/join "/" (concat [prefix] yymmdd [file-name]))))
 ;;
 
-(defn save-gpx-file [message]
+(defn save-gpx-file [message public?]
   ; (debug "save-chat-file:" (:document message))
 
   (let [{ document  :document
@@ -64,30 +72,32 @@
     (if (> file-size FILE_SIZE_MAX)
       (do
         (warn "file too big:" file-size)
-        false)
+        E_FILE_TOO_BIG)
       ;;
-      (let [{body :body :as fr} (file-fetch file-id cfg/tg)
-            hash (byte-array-hash-str HASH_FN body)
-            ; gpx  (parse-bytes body)
-            id   (next-track-id)
-            path (write-data id body)
-            ;
-            title (if (not-blank? caption) caption file-name)]
-            ;
-        (debug "file:" hash fr path)
+      (let [{body :body}  (file-fetch           file-id cfg/tg)
+            hash          (byte-array-hash-str  HASH_FN body)
+            h-trk         (track-by-hash        hash)]
+        (if (and public? h-trk)
+          E_FILE_EXISTS
+          (if-let [_gpx (parse-bytes body)]
+            (let [id   (next-track-id)
+                  path (write-data id body)
+                  title (if (not-blank? caption) caption file-name)]
 
-        ; - info    {:title "source/telegram/caption" :tags [...] :related [...], :num_seg 999}
-        ; - geom    {box? center? bounds?}
+              ; - info    {:title "source/telegram/caption" :tags [...] :related [...], :num_seg 999}
+              ; - geom    {box? center? bounds?}
 
-        (create-track id
-          { :type     "gpx"
-            :user_id  (tg->user-id user-id)
-            :status   "public"
-            :hash     hash
-            :file     {:path path :size file-size}
-            :orig     {:telegram message}
-            :info     {:title title}})))))
-            ;; geom
+              (create-track id
+                { :type     TRACK_TYPE_GPX
+                  :user_id  (tg->user-id user-id)
+                  :status   (if public? TRACK_STATUS_PUBLIC TRACK_STATUS_PRIVATE)
+                  :hash     hash
+                  :file     {:path path :size file-size}
+                  :orig     {:telegram message}
+                  :info     {:title title}}))
+                  ;; geom
+            ;;
+            E_FILE_FORMAT))))))
 ;;
 
 ;;.

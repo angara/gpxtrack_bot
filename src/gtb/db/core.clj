@@ -146,4 +146,19 @@
     (= 1)))
 ;;
 
+(defn track-list [])
+;;;;;;; XXX: implement
+
+(defn track-by-id [id]
+  (-> (dbc)
+    (mc/find-one-as-map TRACK_COLL {:_id id})
+    (id_id)))
+;;
+
+(defn track-by-hash [hash]
+  (-> (dbc)
+    (mc/find-one-as-map TRACK_COLL {:hash hash})
+    (id_id)))
+;;
+
 ;;.

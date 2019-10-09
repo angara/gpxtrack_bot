@@ -15,7 +15,7 @@
   (cond
     ;
     is-gpx
-    (when-let [track (save-gpx-file message)]
+    (when-let [track (save-gpx-file message true)]
       (send-text
         (-> message :chat :id)
         (describe track)

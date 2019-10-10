@@ -24,8 +24,9 @@
   (str "https://api.telegram.org/file/bot" apikey "/" path))
 ;
 
-(defn hesc [^String text]
-  (escape text {\& "&amp;" \< "&lt;" \> "&gt;" \" "&quot;"}))
+(defn hesc [text]
+  (when (string? text)
+    (escape text {\& "&amp;" \< "&lt;" \> "&gt;" \" "&quot;"})))
 ;
 
 ;; ;; ;; ;; ;; ;; ;; ;; ;; ;;

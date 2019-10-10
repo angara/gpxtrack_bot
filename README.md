@@ -41,6 +41,13 @@ Track points:
 - privacy: off
 - inline_mode: on
 - inline placeholder: "Search tracks ..."
+- bot commands
+
+```text
+/help - помощь
+/list - список
+/track nn - информация о треке
+```
 
 @gpxtrack
 @pgxtrack_chat

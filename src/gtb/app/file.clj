@@ -9,11 +9,13 @@
     [mlib.telegram    :refer  [file-fetch] :as tg]
     ;
     [gtb.const        :refer 
-      [TRACK_STATUS_PUBLIC TRACK_STATUS_PRIVATE TRACK_TYPE_GPX]]
+      [ TRACK_STATUS_PUBLIC 
+        TRACK_STATUS_PRIVATE 
+        TRACK_TYPE_GPX]]
     [gtb.app.cfg      :as     cfg]
     [gtb.db.core      :refer  [inc-var TRACK_SEQ_VAR create-track track-by-hash]]
-    [gtb.gpx.core     :refer  [parse-bytes]]
-    [gtb.lib.core     :refer  [not-blank? tg->user-id]]))
+    [gtb.lib.core     :refer  [not-blank? tg->user-id]]
+    [gtb.lib.gpx      :refer  [parse-bytes]]))
 ;=
 
 
@@ -78,10 +80,13 @@
             hash          (byte-array-hash-str  HASH_FN body)
             h-trk         (track-by-hash        hash)]
         (if (and public? h-trk)
-          E_FILE_EXISTS
+          (do
+            (debug "already hashed:" {:user-id user-id :track-id (:id h-trk)})
+            E_FILE_EXISTS)
+          ;;
           (if-let [_gpx (parse-bytes body)]
-            (let [id   (next-track-id)
-                  path (write-data id body)
+            (let [id    (next-track-id)
+                  path  (write-data id body)
                   title (if (not-blank? caption) caption file-name)]
 
               ; - info    {:title "source/telegram/caption" :tags [...] :related [...], :num_seg 999}
@@ -97,7 +102,9 @@
                   :info     {:title title}}))
                   ;; geom
             ;;
-            E_FILE_FORMAT))))))
+            (do
+              (warn "incorrect gpx format:" document)
+              E_FILE_FORMAT)))))))
 ;;
 
 ;;.

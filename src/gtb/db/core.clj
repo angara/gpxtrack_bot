@@ -9,7 +9,9 @@
     [mount.core   :refer [defstate]]
     [mlib.mongo   :refer [connect disconnect new_id id_id]]
     [mlib.config  :refer [conf]]
-    [mlib.util :refer [now-ms]]))
+    [mlib.util    :refer [now-ms]]
+    ;
+    [gtb.const    :refer [TRACK_STATUS_PRIVATE TRACK_STATUS_PUBLIC]]))
 ;
 
 ;; ;; ;; ;; ;; ;; ;; ;; ;; ;;
@@ -126,7 +128,6 @@
 ;; ;; ;; ;; ;; ;; ;; ;; ;; ;;
 
 (defn create-track [id data]
-  (prn "data:" data)
   (-> (dbc)
     (mc/insert-and-return TRACK_COLL
       (assoc data
@@ -146,9 +147,6 @@
     (= 1)))
 ;;
 
-(defn track-list [])
-;;;;;;; XXX: implement
-
 (defn track-by-id [id]
   (-> (dbc)
     (mc/find-one-as-map TRACK_COLL {:_id id})
@@ -160,5 +158,15 @@
     (mc/find-one-as-map TRACK_COLL {:hash hash})
     (id_id)))
 ;;
+
+(defn track-list [offset limit]
+  (-> (dbc)
+    (mq/with-collection (name TRACK_COLL)
+      (mq/find  {:status {:$in [TRACK_STATUS_PUBLIC TRACK_STATUS_PRIVATE]}})
+      (mq/sort  {:ts -1})
+      (mq/skip  offset)
+      (mq/limit limit))
+    (as-> x
+      (map id_id x))))
 
 ;;.

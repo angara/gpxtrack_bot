@@ -5,6 +5,7 @@
     :telegram
     {
       :apikey   "${GPXTRACK_APIKEY}"
+      :botname  "gpxtrack_bot"
       :retry    3
       :timeout  5000
       :longpoll 10}  ;; sec
@@ -13,6 +14,11 @@
     :storage
     {
       :prefix "track"}
+
+    :map 
+    {
+      :track-url "https://angara.net/track?id="}
+    ;
 
     :base-url "https://angara.net/files/"}
 

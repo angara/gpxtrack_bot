@@ -23,7 +23,7 @@
   ( [s default]
     (try
       (if (string? s) (Integer/parseInt s) (int s))
-      (catch Exception ignore default))))
+      (catch Exception _ignore default))))
 ;
 
 (defn ^Integer to-long
@@ -33,7 +33,7 @@
   ( [s default]
     (try
       (if (string? s) (Long/parseLong s) (long s))
-      (catch Exception ignore default))))
+      (catch Exception _ignore default))))
 ;
 
 (defn ^Float to-float
@@ -43,7 +43,7 @@
   ( [s default]
     (try
       (if (string? s) (Float/parseFloat s) (float s))
-      (catch Exception ignore default))))
+      (catch Exception _ignore default))))
 ;
 
 (defn ^Double to-double
@@ -53,7 +53,7 @@
   ( [s default]
     (try
       (if (string? s) (Double/parseDouble s) (double s))
-      (catch Exception ignore default))))
+      (catch Exception _ignore default))))
 ;
 
 ;; ;; ;; time ;; ;; ;;

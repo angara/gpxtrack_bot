@@ -1,63 +1,84 @@
 
 (ns gtb.app.hpriv
   (:require
-    [clojure.string :refer  [trim lower-case]]
-    ;
-    [mlib.config    :refer  [conf]]
     [mlib.logger    :refer  [debug]]
-    [mlib.telegram  :refer  [send-text]]
+    [mlib.telegram  :refer  [send-text hesc]]
     ;
     [gtb.app.cfg    :as     cfg]
-    [gtb.app.file   :refer  [save-gpx-file]]
-    [gtb.app.track  :as     trk]
-    [gtb.lib.core   :refer  [not-blank?]]))
+    [gtb.db.core    :refer  [track-by-id]]
+    [gtb.app.file   :refer  
+      [save-gpx-file E_FILE_FORMAT E_FILE_TOO_BIG]]
+    [gtb.app.cmd    :refer
+      [ split-cmd 
+        cmd-help cmd-list
+        CMD_HELP CMD_START CMD_TRACK CMD_LIST]]
+    [gtb.app.track  :as     trk]))
 ;=
 
 
-(defn cmd-help [chat-id]
-  (send-text chat-id
-    (str
-      "<b>GPX Track bot</b>\n"
-      "version: " (-> conf :build :version) " " (-> conf :build :timestamp) "\n"
-      "\n"
-      "Бот умеет сохранять <b>.gpx</b> файлы из групповых или приватных чатов, "
-      "публиковать ссылки на них."
-      "\n"
-      "\nВ разработке:\n"
-      " - данные трека/сегментов\n"
-      " - редактирование своих треков\n"
-      " - поиск по названию, активности, времени года, территориям\n"
-      " - отображение на карте"
-      "\n\n"
-      "Обсуждение работы бота и пожелания по разработке - @gpxtrack_chat")
-    cfg/tg))
+(defn cmd-track [chat-id [id]]
+  (debug "t:" id)
+  (if (empty? id)
+    (send-text chat-id 
+      "Необходимо указать идентификатор трека.\nПример: <code>/track 123</code>" 
+      cfg/tg)
+    (if-let [trk (track-by-id id)]
+      (send-text chat-id (trk/describe trk) cfg/tg)
+      (send-text chat-id 
+        (str "Трек <b>" (hesc id) "</b> не найден❗️")
+        cfg/tg))))
+;;
+
+(defn cmd-start [chat-id [cmd id]]
+  (if (= cmd "track")
+    (cmd-track chat-id [id])
+    (cmd-help  chat-id)))
+;;
+
+(defn handle-gpx [chat-id message]
+  (let [trk (save-gpx-file message false)]
+    (cond 
+      (map? trk)
+      (do
+        (debug "track.private:" trk)
+        (send-text
+          chat-id
+          (trk/describe trk)
+          cfg/tg))
+      ;
+      (= trk E_FILE_FORMAT)
+      (send-text chat-id "Некорректный формат файла❗️" cfg/tg)
+      ;
+      (= trk E_FILE_TOO_BIG)
+      (send-text chat-id "Слишком большой файл❗️" cfg/tg))))
 ;;
 
 (defn priv-message [message is-gpx]
   (debug "priv-message:" message)
-  (let [text    (:text message)
-        chat-id (-> message :chat :id)
-        cmd     (when (not-blank? text)
-                  (-> text (trim) (lower-case)))]
+  (let [{{chat-id :id} :chat text :text} message
+        [cmd & args] (split-cmd text)]
+    ;
     (cond
       ;
       is-gpx
-      (when-let [track (save-gpx-file message false)]
-        (debug "track.private:" track)
-        (send-text
-          chat-id
-          (trk/describe track)
-          cfg/tg))
+      (handle-gpx chat-id message)
       ;
-      (= "/help" cmd)
+      (= CMD_HELP cmd)
       (cmd-help chat-id)
       ;
-      (= "/start" cmd)
-      (cmd-help chat-id)
+      (= CMD_START cmd)
+      (cmd-start chat-id args)
+      ;
+      (= CMD_TRACK cmd)
+      (cmd-track chat-id args)
+      ;
+      (= CMD_LIST cmd)
+      (cmd-list chat-id args)
       ;
       :else 
-      (send-text chat-id "Для получения справки введите /help" cfg/tg))))
+      (send-text chat-id 
+        "ℹ️ Для получения справки введите /help" 
+        cfg/tg))))
 ;;
 
 ;;.
-

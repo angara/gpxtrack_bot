@@ -8,6 +8,7 @@
     [mlib.crypto      :refer  [byte-array-hash-str]]
     [mlib.logger      :refer  [debug warn]]
     [mlib.telegram    :refer  [file-fetch] :as tg]
+    [mlib.util        :refer  [str-head]]
     ;
     [gtb.const        :refer 
       [ TRACK_STATUS_PUBLIC 
@@ -114,7 +115,7 @@
                     :hash     hash
                     :file     {:path path :size file-size}
                     :orig     {:telegram message}
-                    :title    (subs title 0 TRACK_TITLE_LENGTH)})})
+                    :title    (str-head TRACK_TITLE_LENGTH title)})})
                     ;; descr  TRACK_DESCR_LENGTH
                     ;; geom
             ;;

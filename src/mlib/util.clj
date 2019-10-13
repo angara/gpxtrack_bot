@@ -103,8 +103,7 @@
     (if (> (.length s) 0)
       (str (Character/toUpperCase (.charAt s 0)) (.substring s 1))
       s)))
-;
-
+;;
 
 (def PCRE_SPECIALS ".^$*+?()[{|\\")
 (def PCRE_ESCAPE_MAP

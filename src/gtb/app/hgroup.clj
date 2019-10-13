@@ -6,17 +6,9 @@
     ;
     [gtb.app.cfg    :as     cfg]
     [gtb.app.file   :refer  [save-gpx-file]]
-    [gtb.app.track  :refer  [describe]]))
+    [gtb.app.track  :refer  [describe inline-keyboard]]))
 ;=
 
-
-(defn track-map-url [id]
-  (str (-> cfg/app :map :track-url) id))
-;;
-
-(defn tg-track-url [id]
-  (str "tg://resolve?domain=" (:botname cfg/tg) "&amp;start=track_" id))
-;;
 
 (defn handle-group-gpx [chat-id message]
   (let [  
@@ -39,12 +31,7 @@
           chat-id
           { :text (describe track)
             :parse_mode "HTML"
-            :reply_markup
-            {:inline_keyboard 
-              [[
-                ;{:text "🌐 На карте" :url (track-map-url (:id track))}
-                {:text "⚙️ Подробнее" :url (tg-track-url  (:id track))}
-                ,]]}}
+            :reply_markup (inline-keyboard track)}
           cfg/tg)))))
 ;;
 

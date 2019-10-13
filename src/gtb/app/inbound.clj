@@ -11,6 +11,7 @@
     [gtb.app.cfg    :as     cfg]
     [gtb.app.hgroup :refer  [group-message]]
     [gtb.app.hpriv  :refer  [priv-message]]
+    [gtb.app.track  :as     tr]
     [gtb.app.search :refer  [search-title]]))
 ;=
 
@@ -43,9 +44,9 @@
       :title  (str "id:" (:id trk) " - "
                   (:title trk (-> trk :info :title)))
       ; :description            (:descr trk)
-      :input_message_content  { :message_text (str "track:" (:id trk))
-                                :parse_mode "HTML"}}))
-      ; reply_markup
+      :input_message_content  { :message_text (tr/describe trk)
+                                :parse_mode "HTML"}
+      :reply_markup           (tr/inline-keyboard trk)}))
       ; url
 ;;
 

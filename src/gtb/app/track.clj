@@ -32,5 +32,19 @@
       "\n")))
 ;;
 
+(defn track-map-url [id]
+  (str (-> cfg/app :map :track-url) id))
+;;
+
+(defn tg-track-url [id]
+  (str "tg://resolve?domain=" (:botname cfg/tg) "&amp;start=track_" id))
+;;
+
+(defn inline-keyboard [track]
+  {:inline_keyboard 
+    [[
+      ;{:text "🌐 На карте" :url (track-map-url (:id track))}
+      {:text "⚙️ Подробнее" :url (tg-track-url  (:id track))}]]})
+;;
 
 ;;.

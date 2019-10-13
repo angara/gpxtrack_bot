@@ -6,7 +6,8 @@
     [mlib.telegram  :refer  [send-text hesc]]
     [mlib.util      :refer  [to-int]]
     [gtb.app.cfg    :as     cfg]
-    [gtb.db.core    :as     db]))
+    [gtb.db.core    :as     db]
+    [gtb.app.track  :refer  [track-orig-name]]))
 ;=
 
 (def ^:const CMD_HELP   "/help")
@@ -51,9 +52,11 @@
 
 (defn format-list-item [track]
   (str "🚩 /track_" (:id track) "\n"
-    (hesc (-> track :info :title)) "\n"
-    (when-let [u (-> track :orig :telegram :from :username)]
-      (str "Загрузил: @" u "\n"))
+    (hesc 
+      (or (:title track))
+      (-> track :info :title))    ;; XXX: deprecated
+    "\n"
+    "Загрузил: " (track-orig-name track) "\n"
     "Скачать: " (:base-url cfg/app) (-> track :file :path) 
     "\n"))
 ;;

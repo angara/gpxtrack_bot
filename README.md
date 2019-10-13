@@ -3,17 +3,24 @@
 ## Data Structure
 
 - **track**
-  - id      str_seq
-  - ct      ts
-  - ts      ts
-  - type    "gpx"
-  - user_id "tg:123456"
-  - status  "public"|"private"|"deleted"
-  - hash    "sha1(file)"
-  - file    {:path ... :size ...}
-  - orig    {:telegram {:from {...} :chat {...} :document {...} :caption "..."}}
-  - info    {:title "source/telegram/caption" :tags [...] :related [...], :num_seg 999}
-  - geom    {box? center? bounds?}
+  - id        str_seq
+  - ct        ts
+  - ts        ts
+  - type      "gpx"
+  - user_id   "tg:123456"
+  - status    "public"|"private"|"deleted"
+  - hash      "sha1(file)"
+  - file      {:path ... :size ...}
+  - orig      {:telegram {:from {...} :chat {...} :document {...} :caption "..."}}
+  - title     "source/telegram/caption ... 80 знаков"
+  - descr     "... 1000 знаков ..."
+  - season    ["зима"]
+  - activity  ["вело" "пеший"]
+  - tags      [... all indexed tags ...]
+  - ?related   [ track-ids ]
+  - time      {:start ... :finish ... :moving ...}
+  - distance  {:total 100000}   ;; meters
+  - geom      {box? center? bounds? segments}
 
 - **track_var**
   - id  (var name)
@@ -53,3 +60,7 @@ Track points:
 @pgxtrack_chat
 
 www.strava.com/activities/987654321/export_original
+
+### misc
+
+moving time

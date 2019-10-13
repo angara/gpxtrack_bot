@@ -15,14 +15,19 @@
     nil))
 ;;
 
-(defn describe [track]
-  (let [{:keys [id info file orig]} track]
+(defn track-orig-name [track]
+  (let [{:keys [username first_name last_name]} (-> track :orig :telegram)]
     (str 
-      "#track <b>" id "</b> 🔸 " (hesc (:title info)) "\n"
+      (when username (str "@" username " "))
+      first_name " " last_name)))
+;;
+
+(defn describe [track]
+  (let [{:keys [id info file _orig title _descr]} track]
+    (str 
+      "#track <b>" id "</b> 🔸 " (hesc (or title (:title info))) "\n"
       (status-icon track)
-      (when-let [u (-> orig :telegram :from :username)]
-        (str "Загрузил: @" u "\n"))
-      "\n"
+      "Загрузил: " (track-orig-name track) "\n"
       "download: " (:base-url cfg/app) (:path file)
       "\n")))
 ;;

@@ -14,4 +14,7 @@
 (def ^:const TRACK_TYPE_GPX       "gpx")
 
 
+(def ^:const TRACK_TITLE_LENGTH   80)
+(def ^:const TRACK_DESCR_LENGTH   1000)
+
 ;;.

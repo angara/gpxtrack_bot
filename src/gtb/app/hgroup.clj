@@ -2,7 +2,7 @@
 (ns gtb.app.hgroup
   (:require
     [mlib.logger    :refer  [debug warn]]
-    [mlib.telegram  :refer  [send-message]]
+    [mlib.telegram  :refer  [send-message send-text]]
     ;
     [gtb.app.cfg    :as     cfg]
     [gtb.app.file   :refer  [save-gpx-file]]
@@ -19,20 +19,31 @@
 ;;
 
 (defn handle-group-gpx [chat-id message]
-  (let [trk (save-gpx-file message true)]
+  (let [  
+          {:keys [error track old-track]} 
+          (save-gpx-file message true)]
+    ;
     (cond
-      (map? trk)
+      error
       (do
-        (debug "track.private:" trk)
+        (debug "duplicate: " (:id old-track))
+        (when old-track
+          (send-text chat-id
+            (str "Трек уже загружен: #" (:id old-track))
+            cfg/tg)))            
+      ;
+      track
+      (do
+        (debug "track.public:" track)
         (send-message
           chat-id
-          { :text (describe trk)
+          { :text (describe track)
             :parse_mode "HTML"
             :reply_markup
             {:inline_keyboard 
               [[
-                ;{:text "🌐 На карте" :url (track-map-url (:id trk))}
-                {:text "⚙️ Подробнее" :url (tg-track-url  (:id trk))}
+                ;{:text "🌐 На карте" :url (track-map-url (:id track))}
+                {:text "⚙️ Подробнее" :url (tg-track-url  (:id track))}
                 ,]]}}
           cfg/tg)))))
 ;;

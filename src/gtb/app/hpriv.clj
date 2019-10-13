@@ -36,21 +36,24 @@
 ;;
 
 (defn handle-gpx [chat-id message]
-  (let [trk (save-gpx-file message false)]
+  (let [  {:keys [error track]} 
+          (save-gpx-file message true)]
+    ;
     (cond 
-      (map? trk)
-      (do
-        (debug "track.private:" trk)
-        (send-text
-          chat-id
-          (trk/describe trk)
-          cfg/tg))
       ;
-      (= trk E_FILE_FORMAT)
+      (= error E_FILE_FORMAT)
       (send-text chat-id "Некорректный формат файла❗️" cfg/tg)
       ;
-      (= trk E_FILE_TOO_BIG)
-      (send-text chat-id "Слишком большой файл❗️" cfg/tg))))
+      (= error E_FILE_TOO_BIG)
+      (send-text chat-id "Слишком большой файл❗️" cfg/tg)
+      ;
+      track
+      (do
+        (debug "track.private:" track)
+        (send-text
+          chat-id
+          (trk/describe track)
+          cfg/tg)))))
 ;;
 
 (defn priv-message [message is-gpx]

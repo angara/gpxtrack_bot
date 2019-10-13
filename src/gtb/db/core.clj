@@ -9,7 +9,7 @@
     [mount.core   :refer [defstate]]
     [mlib.mongo   :refer [connect disconnect new_id id_id]]
     [mlib.config  :refer [conf]]
-    [mlib.util    :refer [now-ms]]
+    [mlib.util    :refer [now-ms pcre-escape]]
     ;
     [gtb.const    :refer [TRACK_STATUS_PRIVATE TRACK_STATUS_PUBLIC]]))
 ;
@@ -98,6 +98,11 @@
       (map id_id x))))
 ;;
 
+(defn find-substring [field text]
+  (when text
+    {field {:$regex (pcre-escape text) :$options "i"}}))
+;;
+
 ;; ;; ;; ;; ;; ;; ;; ;; ;; ;;
 
 (defn get-var [name]
@@ -141,7 +146,7 @@
   (-> (dbc)
     (mc/update TRACK_COLL
       {:_id id}
-      {:$set (assoc data {:ts (now-ms)})}
+      {:$set (assoc data :ts (now-ms))}
       {:upsert false})
     (.getN)
     (= 1)))
@@ -168,5 +173,6 @@
       (mq/limit limit))
     (as-> x
       (map id_id x))))
+;;
 
 ;;.

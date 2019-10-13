@@ -5,7 +5,7 @@
 
   <groupId>angara</groupId>
   <artifactId>gpxtrack</artifactId>
-  <version>0.6.0</version>
+  <version>0.6.1</version>
 
   <properties>
     <maven.compiler.source>11</maven.compiler.source>

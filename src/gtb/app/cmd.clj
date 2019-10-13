@@ -53,8 +53,8 @@
 (defn format-list-item [track]
   (str "🚩 /track_" (:id track) "\n"
     (hesc 
-      (or (:title track))
-      (-> track :info :title))    ;; XXX: deprecated
+      (or (:title track)
+          (-> track :info :title)))    ;; XXX: deprecated
     "\n"
     "Загрузил: " (track-orig-name track) "\n"
     "Скачать: " (:base-url cfg/app) (-> track :file :path) 

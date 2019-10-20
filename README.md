@@ -1,5 +1,15 @@
 # GPX Track Bot
 
+## GPX
+
+- [1](https://www.topografix.com/gpx.asp)
+- [2](https://www.topografix.com/GPX/1/1/gpx.xsd)
+- [3](https://en.wikipedia.org/wiki/GPS_Exchange_Format)
+- [4](https://wiki.openstreetmap.org/wiki/GPX)
+- [5](https://github.com/mpetazzoni/leaflet-gpx)
+- [6](https://github.com/mapbox/leaflet-omnivore)
+- [7](https://leafletjs.com/plugins.html)
+
 ## Data Structure
 
 - **track**
@@ -64,3 +74,21 @@ www.strava.com/activities/987654321/export_original
 ### misc
 
 moving time
+
+### TODO
+
+- редактирование заголовка и описания трека
+- установка тэгов сезонов / активностей
+- установка тэгов местности
+- поиск по тэгам и описанию
+- разбор GPX
+- длина трека, время в пути
+- сегменты
+- запись точек трека в базу
+- bounding box
+- поиск по координатам
+- отметка "избранное"
+- описание / инструкция
+- загрузка файлов kml/kmz/plt
+- "скриншот" трека на карте
+- выгрузка нескольких треков в kmz

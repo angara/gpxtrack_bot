@@ -132,5 +132,12 @@
     (apply merge-with deep-merge* maps)))
 ;
 
+;; ;; ;; ;; ;; ;; ;; ;; ;; ;;
+
+(defn remove-nils [data]
+  (into {}
+    (remove (comp nil? second) data)))
+;;
+
 
 ;;.
